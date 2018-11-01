@@ -1,25 +1,43 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import ChessBoard from 'react-chess'
+import {disableBodyScroll} from 'body-scroll-lock'
 
 class App extends Component {
+
+  state = {
+    pieces: ChessBoard.getDefaultLineup(),
+  }
+
+  componentDidMount() {
+    const targetElement = document.querySelector('#root')
+    disableBodyScroll(targetElement)
+  }
+
+  handleMovePiece = (piece, fromSquare, toSquare) => {
+    const newPieces = this.state.pieces
+      .map((curr, index) => {
+        if (piece.index === index) {
+          return `${piece.name}@${toSquare}`
+        } else if (curr.indexOf(toSquare) === 2) {
+          return false // To be removed from the board
+        }
+        return curr
+      })
+      .filter(Boolean)
+
+    this.setState({pieces: newPieces})
+  }
+
   render() {
+    const {pieces} = this.state
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <ChessBoard
+          pieces={pieces}
+          onMovePiece={this.handleMovePiece}
+        />
       </div>
     );
   }
