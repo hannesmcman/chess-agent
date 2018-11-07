@@ -23,8 +23,13 @@
 }
 
 #root {
-  max-width: 90vmin;
-  margin: 1vmin auto;
+  overflow: hidden;
+  height: 100%;
+}
+
+html, body {
+  overflow: hidden;
+  height: 100%;
 }
 
 @keyframes App-logo-spin {
