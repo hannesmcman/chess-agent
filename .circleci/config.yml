@@ -1,0 +1,28 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  prettier:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - run: yarn install
+      - run: mkdir -p logs/
+      - run: yarn run pretty
+      - run:
+          name: git diff
+          command: |
+            touch logs/prettier  # to ensure that the file exists
+            if ! git diff --quiet --stat; then
+              git diff | tee logs/prettier
+              exit 1
+            fi
+          
+workflows:
+  version: 2
+  run_ci:
+    jobs:
+      - prettier
