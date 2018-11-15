@@ -15,6 +15,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "pretty": "prettier --write 'src/**/*.{js,json}' '*.js'",
+    "prettier:diff": "prettier --list-different 'src/**/*.{js,json}' '*.js'",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
