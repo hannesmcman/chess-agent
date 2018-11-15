@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "body-scroll-lock": "^2.5.10",
     "chess.js": "^0.10.2",
     "chessboardjsx": "^2.2.0",
     "jquery": "^3.3.1",
