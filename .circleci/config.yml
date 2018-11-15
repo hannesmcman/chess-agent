@@ -6,7 +6,7 @@ version: 2
 jobs:
   prettier:
     docker:
-      - image: circleci/node:7.10
+      - image: circleci/node:10
     steps:
       - checkout
       - run: yarn install
