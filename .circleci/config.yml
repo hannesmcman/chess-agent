@@ -10,7 +10,6 @@ jobs:
     steps:
       - checkout
       - run: yarn install
-      - run: mkdir -p logs/
       - run: yarn run prettier:diff
           
 workflows:
