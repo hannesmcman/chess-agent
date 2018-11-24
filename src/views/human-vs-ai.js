@@ -1,13 +1,11 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-import Chess from 'chess.js' // import Chess from  "chess.js"(default) if recieving an error about new Chess() not being a constructor
+import Chess from 'chess.js'
 import {getRandomMove} from '../ai/random'
 import Chessboard from 'chessboardjsx'
 
-const game = new Chess()
-
-class HumanVsAI extends Component {
-	static propTypes = {children: PropTypes.func}
+export class HumanVsAI extends Component {
+	static propTypes = {children: PropTypes.func, userColor: PropTypes.string}
 
 	state = {
 		fen: 'start',
@@ -21,10 +19,27 @@ class HumanVsAI extends Component {
 		square: '',
 		// array of past game moves
 		history: [],
+		boardWidth: window.innerWidth / 2,
 	}
 
 	componentDidMount() {
-		this.setState({fen: game.fen()})
+		this.game = new Chess()
+		window.addEventListener('resize', this.updateDimensions)
+		if (this.props.userColor === 'black') {
+			setTimeout(() => {
+				this.makeAIMove()
+			}, 500)
+		}
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener('resize', this.updateDimensions)
+	}
+
+	game = undefined
+
+	updateDimensions = () => {
+		this.setState(() => ({boardWidth: window.innerWidth / 2}))
 	}
 
 	// keep clicked square style and remove hint squares
@@ -61,7 +76,7 @@ class HumanVsAI extends Component {
 
 	onDrop = ({sourceSquare, targetSquare}) => {
 		// see if the move is legal
-		let move = game.move({
+		let move = this.game.move({
 			from: sourceSquare,
 			to: targetSquare,
 			promotion: 'q', // always promote to a queen for example simplicity
@@ -72,7 +87,7 @@ class HumanVsAI extends Component {
 
 		return new Promise(resolve => {
 			this.setState(() => ({
-				fen: game.fen(),
+				fen: this.game.fen(),
 			}))
 			resolve()
 			this.updateHistory()
@@ -83,20 +98,29 @@ class HumanVsAI extends Component {
 		)
 	}
 
+	resetGame = () => {
+		this.game = new Chess()
+	}
+
+	allowDrag = ({piece}) => {
+		return piece[0] === this.props.userColor[0]
+	}
+
 	makeAIMove = () => {
-		if (game.game_over()) {
-			console.log('GAME OVER')
+		if (this.game.game_over()) {
+			alert('Game Over!')
+			this.resetGame()
 		}
-		const aiMove = getRandomMove(game)
-		game.move(aiMove)
+		const aiMove = getRandomMove(this.game)
+		this.game.move(aiMove)
 		this.setState(() => ({
-			fen: game.fen(),
+			fen: this.game.fen(),
 		}))
 		this.updateHistory()
 	}
 
 	updateHistory = () => {
-		const history = game.history({verbose: true})
+		const history = this.game.history({verbose: true})
 		this.setState(({pieceSquare}) => ({
 			history: history,
 			squareStyles: squareStyling({pieceSquare, history}),
@@ -105,7 +129,7 @@ class HumanVsAI extends Component {
 
 	onMouseOverSquare = square => {
 		// get list of possible moves for this square
-		let moves = game.moves({
+		let moves = this.game.moves({
 			square: square,
 			verbose: true,
 		})
@@ -114,7 +138,7 @@ class HumanVsAI extends Component {
 		if (moves.length === 0) return
 
 		let squaresToHighlight = []
-		for (var i = 0; i < moves.length; i++) {
+		for (let i = 0; i < moves.length; i++) {
 			squaresToHighlight.push(moves[i].to)
 		}
 
@@ -124,48 +148,27 @@ class HumanVsAI extends Component {
 	onMouseOutSquare = square => this.removeHighlightSquare(square)
 
 	render() {
-		const {fen, dropSquareStyle, squareStyles} = this.state
-		return this.props.children({
-			squareStyles,
-			position: fen,
-			onMouseOverSquare: this.onMouseOverSquare,
-			onMouseOutSquare: this.onMouseOutSquare,
-			onDrop: this.onDrop,
-			dropSquareStyle,
-		})
-	}
-}
+		const {fen, dropSquareStyle, squareStyles, boardWidth} = this.state
 
-export default function WithMoveValidation() {
-	return (
-		<div>
-			<HumanVsAI>
-				{({
-					position,
-					onDrop,
-					onMouseOverSquare,
-					onMouseOutSquare,
-					squareStyles,
-					dropSquareStyle,
-				}) => (
-					<Chessboard
-						id="HumanVsAI"
-						width={window.innerWidth / 2}
-						position={position}
-						onDrop={onDrop}
-						onMouseOverSquare={onMouseOverSquare}
-						onMouseOutSquare={onMouseOutSquare}
-						boardStyle={{
-							borderRadius: '5px',
-							boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`,
-						}}
-						squareStyles={squareStyles}
-						dropSquareStyle={dropSquareStyle}
-					/>
-				)}
-			</HumanVsAI>
-		</div>
-	)
+		return (
+			<Chessboard
+				allowDrag={this.allowDrag}
+				boardStyle={{
+					borderRadius: '5px',
+					boxShadow: '0 5px 15px rgba(0, 0, 0, 0.5)',
+				}}
+				dropSquareStyle={dropSquareStyle}
+				id="HumanVsAI"
+				onDrop={this.onDrop}
+				onMouseOutSquare={this.onMouseOutSquare}
+				onMouseOverSquare={this.onMouseOverSquare}
+				onSquareClick={this.onMouseOverSquare}
+				position={fen}
+				squareStyles={squareStyles}
+				width={boardWidth}
+			/>
+		)
+	}
 }
 
 const squareStyling = ({pieceSquare, history}) => {
