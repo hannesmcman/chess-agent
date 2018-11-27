@@ -25,11 +25,11 @@ export function getBestMove(gameState, maxDepth) {
 			ratings: [2000, 2200, 2500],
 		})
 		.then(analysis => {
-			console.log(analysis)
+			// console.log(analysis)
 			const {moves} = analysis
 			return moves[Math.floor(Math.random() * moves.length)].san
 		})
-		.catch(err => {
+		.catch(() => {
 			return alphabetaRoot(gameState, maxDepth)
 		})
 }
@@ -45,7 +45,7 @@ export function alphabetaRoot(gameState, maxDepth) {
 			Number.POSITIVE_INFINITY,
 			true,
 		)
-		console.log(move, value)
+		// console.log(move, value)
 		gameState.undo()
 		return value
 	})
@@ -58,13 +58,14 @@ export function alphabeta(gameState, depth, alpha, beta, isMaximizingPlayer) {
 	}
 	if (isMaximizingPlayer) {
 		let value = Number.NEGATIVE_INFINITY
-		for (const move in gameState.moves()) {
-			const newGameState = Object.assign(Object.create(gameState), gameState)
-			newGameState.move(move)
+		const moves = gameState.moves()
+		for (let i = 0; i < moves.length; i++) {
+			gameState.move(moves[i])
 			value = Math.max(
 				value,
-				alphabeta(newGameState, depth - 1, alpha, beta, false),
+				alphabeta(gameState, depth - 1, alpha, beta, false),
 			)
+			gameState.undo()
 			alpha = Math.max(alpha, value)
 			if (alpha >= beta) {
 				break
@@ -73,13 +74,14 @@ export function alphabeta(gameState, depth, alpha, beta, isMaximizingPlayer) {
 		return value
 	} else {
 		let value = Number.POSITIVE_INFINITY
-		for (const move in gameState.moves()) {
-			const newGameState = Object.assign(Object.create(gameState), gameState)
-			newGameState.move(move)
+		const moves = gameState.moves()
+		for (let i = 0; i < moves.length; i++) {
+			gameState.move(moves[i])
 			value = Math.min(
 				value,
-				alphabeta(newGameState, depth - 1, alpha, beta, true),
+				alphabeta(gameState, depth - 1, alpha, beta, true),
 			)
+			gameState.undo()
 			beta = Math.min(beta, value)
 			if (alpha >= beta) {
 				break
