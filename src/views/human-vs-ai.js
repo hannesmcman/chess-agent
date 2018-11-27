@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import Chess from 'chess.js' // import Chess from  "chess.js"(default) if recieving an error about new Chess() not being a constructor
 import {getRandomMove} from '../ai/random'
+import {getBestMove} from '../ai/alpha-beta'
 import Chessboard from 'chessboardjsx'
 
 const game = new Chess()
@@ -83,11 +84,13 @@ class HumanVsAI extends Component {
 		)
 	}
 
-	makeAIMove = () => {
+	makeAIMove = async () => {
 		if (game.game_over()) {
 			console.log('GAME OVER')
 		}
-		const aiMove = getRandomMove(game)
+		// const aiMove = getRandomMove(game)
+		const aiMove = await getBestMove(game, 2)
+		console.log(aiMove)
 		game.move(aiMove)
 		this.setState(() => ({
 			fen: game.fen(),
