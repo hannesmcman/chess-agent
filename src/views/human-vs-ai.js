@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import Chess from 'chess.js'
-import {getRandomMove} from '../ai/random'
+import {getBestMove} from '../ai/alpha-beta'
 import Chessboard from 'chessboardjsx'
 
 export class HumanVsAI extends Component {
@@ -98,25 +98,27 @@ export class HumanVsAI extends Component {
 		)
 	}
 
+	makeAIMove = async () => {
+		if (this.game.game_over()) {
+			// console.log('GAME OVER')
+			this.resetGame()
+		}
+		// const aiMove = getRandomMove(game)
+		const aiMove = await getBestMove(this.game, 2)
+		// console.log(aiMove)
+		this.game.move(aiMove)
+		this.setState(() => ({
+			fen: this.game.fen(),
+		}))
+		this.updateHistory()
+	}
+
 	resetGame = () => {
 		this.game = new Chess()
 	}
 
 	allowDrag = ({piece}) => {
 		return piece[0] === this.props.userColor[0]
-	}
-
-	makeAIMove = () => {
-		if (this.game.game_over()) {
-			alert('Game Over!')
-			this.resetGame()
-		}
-		const aiMove = getRandomMove(this.game)
-		this.game.move(aiMove)
-		this.setState(() => ({
-			fen: this.game.fen(),
-		}))
-		this.updateHistory()
 	}
 
 	updateHistory = () => {

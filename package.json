@@ -8,6 +8,8 @@
     "chess.js": "^0.10.2",
     "chessboardjsx": "^2.2.0",
     "jquery": "^3.3.1",
+    "lichess-opening-explorer": "^1.0.1",
+    "lodash": "^4.17.11",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
     "react-scripts": "2.1.1",
