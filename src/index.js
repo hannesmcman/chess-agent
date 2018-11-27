@@ -4,6 +4,7 @@ import './index.css'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
 import {disableBodyScroll} from 'body-scroll-lock'
+import 'bootstrap/dist/css/bootstrap.css'
 
 ReactDOM.render(<App />, document.getElementById('root'))
 
