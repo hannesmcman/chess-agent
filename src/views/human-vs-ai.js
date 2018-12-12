@@ -4,6 +4,14 @@ import Chess from 'chess.js'
 import {getBestMove} from '../ai/alpha-beta'
 import Chessboard from 'chessboardjsx'
 
+const getBoardWidth = (width, height) => {
+	if (width < height) {
+		return width - width/10
+	} else {
+		return height - height/10
+	}
+}
+
 export class HumanVsAI extends Component {
 	static propTypes = {children: PropTypes.func, userColor: PropTypes.string}
 
@@ -19,7 +27,7 @@ export class HumanVsAI extends Component {
 		square: '',
 		// array of past game moves
 		history: [],
-		boardWidth: window.innerWidth - 100,
+		boardWidth: getBoardWidth(window.innerWidth, window.innerHeight),
 	}
 
 	componentDidMount() {
