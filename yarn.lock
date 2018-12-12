@@ -1555,11 +1555,7 @@ binary-extensions@^1.0.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-1.12.0.tgz#c2d780f53d45bba8317a8902d4ceeaf3a6385b14"
 
-bluebird@^3.5.0:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
-
-bluebird@^3.5.1:
+bluebird@^3.5.0, bluebird@^3.5.1:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
 
@@ -1905,9 +1901,9 @@ check-types@^7.3.0:
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/check-types/-/check-types-7.4.0.tgz#0378ec1b9616ec71f774931a3c6516fad8c152f4"
 
-chess.js@^0.10.2:
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/chess.js/-/chess.js-0.10.2.tgz#eacefa2067155f87f046e80cc12d2019eef1b81a"
+"chess.js@https://github.com/hannesmcman/chess.js.git":
+  version "0.10.3-dev"
+  resolved "https://github.com/hannesmcman/chess.js.git#01566865e7ef0aa2f69f9d81162952aba49cb519"
 
 chessboardjsx@^2.2.0:
   version "2.2.0"

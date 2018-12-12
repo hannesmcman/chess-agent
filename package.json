@@ -5,7 +5,7 @@
   "dependencies": {
     "body-scroll-lock": "^2.5.10",
     "bootstrap": "^4.1.3",
-    "chess.js": "^0.10.2",
+    "chess.js": "https://github.com/hannesmcman/chess.js.git",
     "chessboardjsx": "^2.2.0",
     "jquery": "^3.3.1",
     "lichess-opening-explorer": "^1.0.1",

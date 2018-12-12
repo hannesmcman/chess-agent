@@ -30,6 +30,7 @@ globals:
   document: true
   setTimeout: true
   alert: true
+  console: true
 
 rules:
   array-callback-return: error

@@ -11,18 +11,17 @@ const PIECE_VALUE = {
 	k: 900,
 }
 
-export function getBestMove(gameState, maxDepth) {
+export function getBestMove(gameState, maxDepth, isWhite) {
 	const fen = gameState.fen()
-	// if (parseInt(fen[fen.length-1]) > 3) {
-	//   return alphabetaRoot(gameState, maxDepth)
-	// }
+	if (parseInt(fen[fen.length - 1]) > 3) {
+		return alphabetaRoot(gameState, maxDepth, isWhite)
+	}
 	const explorer = new OpeningExplorer()
 	return explorer
 		.analyze(fen, {
-			master: false,
+			master: true,
 			variant: 'standard',
 			speeds: ['classical'],
-			ratings: [2000, 2200, 2500],
 		})
 		.then(analysis => {
 			// console.log(analysis)
@@ -30,40 +29,59 @@ export function getBestMove(gameState, maxDepth) {
 			return moves[Math.floor(Math.random() * moves.length)].san
 		})
 		.catch(() => {
-			return alphabetaRoot(gameState, maxDepth)
+			return alphabetaRoot(gameState, maxDepth, isWhite)
 		})
 }
 
-export function alphabetaRoot(gameState, maxDepth) {
+let numPos = 0
+
+export function alphabetaRoot(gameState, maxDepth, isWhite) {
 	const newGameMoves = gameState.moves()
-	return maxBy(newGameMoves, move => {
+	const bestMove = maxBy(newGameMoves, move => {
 		gameState.move(move)
 		const value = alphabeta(
 			gameState,
 			maxDepth - 1,
 			Number.NEGATIVE_INFINITY,
 			Number.POSITIVE_INFINITY,
-			true,
+			false,
+			isWhite,
 		)
-		// console.log(move, value)
 		gameState.undo()
+		// console.log(move, value)
 		return value
 	})
+	console.log('Positions evaluated: ', numPos)
+	return bestMove
 }
 
-export function alphabeta(gameState, depth, alpha, beta, isMaximizingPlayer) {
+export function alphabeta(
+	gameState,
+	depth,
+	alpha,
+	beta,
+	isMaximizingPlayer,
+	isWhite,
+) {
+	numPos++
 	if (depth === 0 || gameState.game_over()) {
-		// console.log(heuristic(gameState))
-		return heuristic(gameState)
+		return heuristic(gameState, isWhite)
 	}
 	if (isMaximizingPlayer) {
 		let value = Number.NEGATIVE_INFINITY
-		const moves = gameState.moves()
+		const moves = gameState.ugly_moves()
 		for (let i = 0; i < moves.length; i++) {
-			gameState.move(moves[i])
+			gameState.ugly_move(moves[i])
 			value = Math.max(
 				value,
-				alphabeta(gameState, depth - 1, alpha, beta, false),
+				alphabeta(
+					gameState,
+					depth - 1,
+					alpha,
+					beta,
+					!isMaximizingPlayer,
+					isWhite,
+				),
 			)
 			gameState.undo()
 			alpha = Math.max(alpha, value)
@@ -74,25 +92,31 @@ export function alphabeta(gameState, depth, alpha, beta, isMaximizingPlayer) {
 		return value
 	} else {
 		let value = Number.POSITIVE_INFINITY
-		const moves = gameState.moves()
+		const moves = gameState.ugly_moves()
 		for (let i = 0; i < moves.length; i++) {
-			gameState.move(moves[i])
+			gameState.ugly_move(moves[i])
 			value = Math.min(
 				value,
-				alphabeta(gameState, depth - 1, alpha, beta, true),
+				alphabeta(
+					gameState,
+					depth - 1,
+					alpha,
+					beta,
+					!isMaximizingPlayer,
+					isWhite,
+				),
 			)
 			gameState.undo()
 			beta = Math.min(beta, value)
 			if (alpha >= beta) {
 				break
 			}
-			return value
 		}
+		return value
 	}
 }
 
-function heuristic(gameState) {
-	const whiteToMove = gameState.turn() === 'w'
+function heuristic(gameState, isWhite) {
 	const boardSum = reduce(
 		gameState.SQUARES,
 		(sum, square) => {
@@ -108,5 +132,5 @@ function heuristic(gameState) {
 		},
 		0,
 	)
-	return whiteToMove ? boardSum : -boardSum
+	return isWhite ? boardSum : -boardSum
 }

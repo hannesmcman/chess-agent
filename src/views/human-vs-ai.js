@@ -19,7 +19,7 @@ export class HumanVsAI extends Component {
 		square: '',
 		// array of past game moves
 		history: [],
-		boardWidth: window.innerWidth / 2,
+		boardWidth: window.innerWidth - 100,
 	}
 
 	componentDidMount() {
@@ -104,8 +104,11 @@ export class HumanVsAI extends Component {
 			this.resetGame()
 		}
 		// const aiMove = getRandomMove(game)
-		const aiMove = await getBestMove(this.game, 2)
-		// console.log(aiMove)
+		const isWhite = this.props.userColor === 'black'
+		const d = new Date().getTime()
+		const aiMove = await getBestMove(this.game, 4, isWhite)
+		const d2 = new Date().getTime()
+		console.log('Time: ', (d2 - d) / 1000)
 		this.game.move(aiMove)
 		this.setState(() => ({
 			fen: this.game.fen(),
