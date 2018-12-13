@@ -1,6 +1,7 @@
 import reduce from 'lodash/reduce'
 import maxBy from 'lodash/maxBy'
 import OpeningExplorer from 'lichess-opening-explorer'
+import {getEndGameMove} from './lichess'
 
 const PIECE_VALUE = {
 	p: 10,
@@ -13,15 +14,17 @@ const PIECE_VALUE = {
 
 export function getBestMove(gameState, maxDepth, isWhite) {
 	const fen = gameState.fen()
-	if (parseInt(fen[fen.length - 1]) > 3) {
-		return alphabetaRoot(gameState, maxDepth, isWhite)
-	}
+	// if (parseInt(fen[fen.length - 1]) > 3) {
+	// 	console.log("Leaving explorer on purpose")
+	// 	return alphabetaRoot(gameState, maxDepth, isWhite)
+	// }
 	const explorer = new OpeningExplorer()
 	return explorer
 		.analyze(fen, {
-			master: true,
+			master: false,
 			variant: 'standard',
 			speeds: ['classical'],
+			ratings: [2000, 2200, 2500]
 		})
 		.then(analysis => {
 			console.log(analysis)
@@ -29,7 +32,12 @@ export function getBestMove(gameState, maxDepth, isWhite) {
 			const randomIndex = Math.floor(Math.random() * moves.length)
 			return moves[randomIndex].san
 		})
-		.catch(() => {
+		.catch(async () => {
+			const endGameMove = await getEndGameMove(gameState)
+			if (endGameMove.dtm) {
+				console.log(endGameMove)
+				return endGameMove.san
+			}
 			return alphabetaRoot(gameState, maxDepth, isWhite)
 		})
 }
@@ -45,13 +53,13 @@ export function alphabetaRoot(gameState, maxDepth, isWhite) {
 			maxDepth - 1,
 			Number.NEGATIVE_INFINITY,
 			Number.POSITIVE_INFINITY,
-			false,
-			isWhite,
+			!isWhite,
 		)
 		gameState.undo()
-		console.log(move, value)
-		return value
+		// console.log(move, value)
+		return isWhite ? value : -value
 	})
+	console.log(bestMove)
 	console.log('Positions evaluated: ', numPos)
 	return bestMove
 }
@@ -62,12 +70,11 @@ export function alphabeta(
 	alpha,
 	beta,
 	isMaximizingPlayer,
-	isWhite,
 ) {
 	numPos++
 	if (depth === 0 || gameState.game_over()) {
-		console.log(gameState, gameState.game_over())
-		return heuristic(gameState, isWhite)
+		// console.log(gameState, gameState.game_over())
+		return heuristic(gameState)
 	}
 	if (isMaximizingPlayer) {
 		let value = Number.NEGATIVE_INFINITY
@@ -82,7 +89,6 @@ export function alphabeta(
 					alpha,
 					beta,
 					!isMaximizingPlayer,
-					isWhite,
 				),
 			)
 			gameState.undo()
@@ -105,7 +111,6 @@ export function alphabeta(
 					alpha,
 					beta,
 					!isMaximizingPlayer,
-					isWhite,
 				),
 			)
 			gameState.undo()
@@ -118,24 +123,134 @@ export function alphabeta(
 	}
 }
 
-function heuristic(gameState, isWhite) {
-	if (gameState.game_over()) {
-		return isWhite ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY
+function heuristic(gameState) {
+	const board = gameState.board()
+	// console.log(board)
+	let boardSum = 0
+	for (let y=0; y < 8; y++) {
+		for (let x=0; x < 8; x++) {
+			boardSum += getPieceValue(board[y][x], x, y)
+		}
 	}
-	const boardSum = reduce(
-		gameState.SQUARES,
-		(sum, square) => {
-			const squareState = gameState.get(square)
-			if (squareState === null) {
-				return sum
-			}
-			const value =
-				squareState.color === 'w'
-					? PIECE_VALUE[squareState.type]
-					: -PIECE_VALUE[squareState.type]
-			return sum + value
-		},
-		0,
-	)
-	return isWhite ? boardSum : -boardSum
+	if (gameState.game_over()) {
+		// console.log("Game over: ", gameState.ascii(), gameState.turn(), boardSum)
+		boardSum += gameState.turn() === 'b' ? PIECE_VALUE['k'] : -PIECE_VALUE['k']
+		// console.log(boardSum)
+	}
+	return boardSum
 }
+
+const getPieceValue = (piece, x, y) => {
+	if (piece === null) {
+		return 0
+	}
+	const isWhite = piece.color === 'w'
+	const pieceValue = isWhite ? PIECE_VALUE[piece.type] : -PIECE_VALUE[piece.type]
+	let locationValue
+	switch (piece.type) {
+		case 'p':
+			locationValue = isWhite ? pawnEvalWhite[y][x] : -pawnEvalBlack[y][x]
+			break
+		case 'n':
+			locationValue = isWhite ? knightEval[y][x] : -knightEval[y][x]
+			break
+		case 'b':
+			locationValue = isWhite ? bishopEvalWhite[y][x] : -bishopEvalBlack[y][x]
+			break
+		case 'r':
+			locationValue = isWhite ? rookEvalWhite[y][x] : -rookEvalBlack[y][x]
+			break
+		case 'q':
+			locationValue = isWhite ? evalQueen[y][x] : -evalQueen[y][x]
+			break
+		case 'k':
+			locationValue = isWhite ? kingEvalWhite[y][x] : -kingEvalBlack[y][x]
+			break
+		default:
+			locationValue = 0
+	}
+	// console.log(piece, pieceValue, locationValue, pieceValue + locationValue)
+	return pieceValue + locationValue
+}
+
+const reverseArray = function(array) {
+    return array.slice().reverse();
+};
+
+const pawnEvalWhite =
+    [
+        [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+        [1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0],
+        [0.5,  0.5,  1.0,  2.5,  2.5,  1.0,  0.5,  0.5],
+        [0.0,  0.0,  0.0,  2.0,  2.0,  0.0,  0.0,  0.0],
+        [0.5, -0.5, -1.0,  0.0,  0.0, -1.0, -0.5,  0.5],
+        [0.5,  1.0, 1.0,  -2.0, -2.0,  1.0,  1.0,  0.5],
+        [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+    ];
+
+const pawnEvalBlack = reverseArray(pawnEvalWhite);
+
+const knightEval =
+    [
+        [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0],
+        [-4.0, -2.0,  0.0,  0.0,  0.0,  0.0, -2.0, -4.0],
+        [-3.0,  0.0,  1.0,  1.5,  1.5,  1.0,  0.0, -3.0],
+        [-3.0,  0.5,  1.5,  2.0,  2.0,  1.5,  0.5, -3.0],
+        [-3.0,  0.0,  1.5,  2.0,  2.0,  1.5,  0.0, -3.0],
+        [-3.0,  0.5,  1.0,  1.5,  1.5,  1.0,  0.5, -3.0],
+        [-4.0, -2.0,  0.0,  0.5,  0.5,  0.0, -2.0, -4.0],
+        [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0]
+    ];
+
+const bishopEvalWhite = [
+    [ -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0],
+    [ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+    [ -1.0,  0.0,  0.5,  1.0,  1.0,  0.5,  0.0, -1.0],
+    [ -1.0,  0.5,  0.5,  1.0,  1.0,  0.5,  0.5, -1.0],
+    [ -1.0,  0.0,  1.0,  1.0,  1.0,  1.0,  0.0, -1.0],
+    [ -1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0, -1.0],
+    [ -1.0,  0.5,  0.0,  0.0,  0.0,  0.0,  0.5, -1.0],
+    [ -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0]
+];
+
+const bishopEvalBlack = reverseArray(bishopEvalWhite);
+
+const rookEvalWhite = [
+    [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+    [  0.5,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.5],
+    [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [  0.0,   0.0, 0.0,  0.5,  0.5,  0.0,  0.0,  0.0]
+];
+
+const rookEvalBlack = reverseArray(rookEvalWhite);
+
+const evalQueen =
+    [
+    [ -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0],
+    [ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+    [ -1.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+    [ -0.5,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+    [  0.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+    [ -1.0,  0.5,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+    [ -1.0,  0.0,  0.5,  0.0,  0.0,  0.0,  0.0, -1.0],
+    [ -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0]
+];
+
+const kingEvalWhite = [
+
+    [ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [ -2.0, -3.0, -3.0, -4.0, -4.0, -3.0, -3.0, -2.0],
+    [ -1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0],
+    [  2.0,  2.0,  0.0,  0.0,  0.0,  0.0,  2.0,  2.0 ],
+    [  2.0,  3.0,  1.0,  0.0,  0.0,  1.0,  3.0,  2.0 ]
+];
+
+const kingEvalBlack = reverseArray(kingEvalWhite);
