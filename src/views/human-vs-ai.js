@@ -6,9 +6,9 @@ import Chessboard from 'chessboardjsx'
 
 const getBoardWidth = (width, height) => {
 	if (width < height) {
-		return width - width/10
+		return width - width / 10
 	} else {
-		return height - height/10
+		return height - height / 10
 	}
 }
 
@@ -89,7 +89,6 @@ export class HumanVsAI extends Component {
 			to: targetSquare,
 			promotion: 'q', // always promote to a queen for example simplicity
 		})
-
 		// illegal move
 		if (move === null) return
 
@@ -108,7 +107,7 @@ export class HumanVsAI extends Component {
 
 	makeAIMove = async () => {
 		if (this.game.game_over()) {
-			// console.log('GAME OVER')
+			console.log('GAME OVER')
 			this.resetGame()
 		}
 		// const aiMove = getRandomMove(game)
