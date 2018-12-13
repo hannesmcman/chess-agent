@@ -1,15 +1,15 @@
 {
   "main.css": "/chess-agent/static/css/main.f1225030.chunk.css",
-  "main.js": "/chess-agent/static/js/main.9a387e0d.chunk.js",
-  "main.js.map": "/chess-agent/static/js/main.9a387e0d.chunk.js.map",
-  "static/css/1.22825121.chunk.css": "/chess-agent/static/css/1.22825121.chunk.css",
-  "static/js/1.95d6c756.chunk.js": "/chess-agent/static/js/1.95d6c756.chunk.js",
-  "static/js/1.95d6c756.chunk.js.map": "/chess-agent/static/js/1.95d6c756.chunk.js.map",
+  "main.js": "/chess-agent/static/js/main.a2c868c5.chunk.js",
+  "main.js.map": "/chess-agent/static/js/main.a2c868c5.chunk.js.map",
+  "static/css/1.384d5c33.chunk.css": "/chess-agent/static/css/1.384d5c33.chunk.css",
+  "static/js/1.1e8df056.chunk.js": "/chess-agent/static/js/1.1e8df056.chunk.js",
+  "static/js/1.1e8df056.chunk.js.map": "/chess-agent/static/js/1.1e8df056.chunk.js.map",
   "runtime~main.js": "/chess-agent/static/js/runtime~main.094ed3dd.js",
   "runtime~main.js.map": "/chess-agent/static/js/runtime~main.094ed3dd.js.map",
-  "static/css/1.22825121.chunk.css.map": "/chess-agent/static/css/1.22825121.chunk.css.map",
+  "static/css/1.384d5c33.chunk.css.map": "/chess-agent/static/css/1.384d5c33.chunk.css.map",
   "static/css/main.f1225030.chunk.css.map": "/chess-agent/static/css/main.f1225030.chunk.css.map",
   "index.html": "/chess-agent/index.html",
-  "precache-manifest.d22b4161f096f4dccdd4fb0c32c78b33.js": "/chess-agent/precache-manifest.d22b4161f096f4dccdd4fb0c32c78b33.js",
+  "precache-manifest.8251243a20d879e5b22e7c3bd2ca6ab2.js": "/chess-agent/precache-manifest.8251243a20d879e5b22e7c3bd2ca6ab2.js",
   "service-worker.js": "/chess-agent/service-worker.js"
 }
