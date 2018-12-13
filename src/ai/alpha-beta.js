@@ -24,9 +24,10 @@ export function getBestMove(gameState, maxDepth, isWhite) {
 			speeds: ['classical'],
 		})
 		.then(analysis => {
-			// console.log(analysis)
+			console.log(analysis)
 			const {moves} = analysis
-			return moves[Math.floor(Math.random() * moves.length)].san
+			const randomIndex = Math.floor(Math.random() * moves.length)
+			return moves[randomIndex].san
 		})
 		.catch(() => {
 			return alphabetaRoot(gameState, maxDepth, isWhite)
@@ -48,7 +49,7 @@ export function alphabetaRoot(gameState, maxDepth, isWhite) {
 			isWhite,
 		)
 		gameState.undo()
-		// console.log(move, value)
+		console.log(move, value)
 		return value
 	})
 	console.log('Positions evaluated: ', numPos)
@@ -65,6 +66,7 @@ export function alphabeta(
 ) {
 	numPos++
 	if (depth === 0 || gameState.game_over()) {
+		console.log(gameState, gameState.game_over())
 		return heuristic(gameState, isWhite)
 	}
 	if (isMaximizingPlayer) {
@@ -117,6 +119,9 @@ export function alphabeta(
 }
 
 function heuristic(gameState, isWhite) {
+	if (gameState.game_over()) {
+		return isWhite ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY
+	}
 	const boardSum = reduce(
 		gameState.SQUARES,
 		(sum, square) => {
