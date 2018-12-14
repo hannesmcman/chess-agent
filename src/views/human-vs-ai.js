@@ -47,7 +47,9 @@ export class HumanVsAI extends Component {
 	game = undefined
 
 	updateDimensions = () => {
-		this.setState(() => ({boardWidth: getBoardWidth(window.innerWidth, window.innerHeight)}))
+		this.setState(() => ({
+			boardWidth: getBoardWidth(window.innerWidth, window.innerHeight),
+		}))
 	}
 
 	// keep clicked square style and remove hint squares
