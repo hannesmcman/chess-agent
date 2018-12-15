@@ -3,6 +3,7 @@ import Select from 'react-select'
 import {Button} from 'reactstrap'
 import './App.css'
 import {HumanVsAI} from './views/human-vs-ai'
+import {Helmet} from 'react-helmet'
 
 const options = [
 	{value: 'black', label: 'Black'},
@@ -30,6 +31,18 @@ class App extends Component {
 			return (
 				<div style={styles.container}>
 					<div style={styles.dialogue}>
+						<Helmet>
+							<title>Killer Instinct</title>
+							<meta
+								name="Description"
+								content="Introduction to artificial intelligence final project."
+							/>
+							<link
+								rel="shortcut icon"
+								type="image/x-icon"
+								href="/favicon.ico"
+							/>
+						</Helmet>
 						<h1>Let&apos;s Play Chess!</h1>
 						<div style={styles.select}>
 							<Select
@@ -50,6 +63,14 @@ class App extends Component {
 		}
 		return (
 			<div style={styles.boardsContainer}>
+				<Helmet>
+					<title>Killer Instinct</title>
+					<meta
+						name="Description"
+						content="Introduction to artificial intelligence final project."
+					/>
+					<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+				</Helmet>
 				<HumanVsAI userColor={this.state.userColor.value} />
 			</div>
 		)
