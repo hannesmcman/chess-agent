@@ -13,10 +13,6 @@ const PIECE_VALUE = {
 
 export function getBestMove(gameState, maxDepth, isWhite) {
 	const fen = gameState.fen()
-	// if (parseInt(fen[fen.length - 1]) > 3) {
-	// 	console.log("Leaving explorer on purpose")
-	// 	return alphabetaRoot(gameState, maxDepth, isWhite)
-	// }
 	const explorer = new OpeningExplorer()
 	return explorer
 		.analyze(fen, {
@@ -33,8 +29,7 @@ export function getBestMove(gameState, maxDepth, isWhite) {
 		})
 		.catch(async () => {
 			const endGameMove = await getEndGameMove(gameState)
-			if (endGameMove.dtm) {
-				console.log(endGameMove)
+			if (endGameMove.dtm || endGameMove.checkmate) {
 				return endGameMove.san
 			}
 			return alphabetaRoot(gameState, maxDepth, isWhite)
