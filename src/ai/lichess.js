@@ -6,7 +6,6 @@ export function getEndGameMove(gameState) {
 	return fetch(`${LICHESS_ENDGAME_URL}${formattedFen}`)
 		.then(async resp => {
 			const respJSON = await resp.json()
-			console.log(respJSON)
 			return respJSON.moves && respJSON.moves.length !== 0
 				? respJSON.moves[0]
 				: null
